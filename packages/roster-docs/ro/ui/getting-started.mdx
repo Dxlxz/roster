@@ -1,0 +1,146 @@
+---
+title: Începeți de aici.
+description: Instalați roster UI într-o aplicație React și utilizați componentele și temele sale.
+---
+
+import { PageBanner } from "/snippets/page-banner.mdx"
+
+## Prezentare generală
+
+roster UI este biblioteca UI React open-source a roster. Oferă primitive fundamentale, componente partajate, pictograme și tokenuri de temă cu CSS preconfigurat, astfel încât aplicația dvs. nu are nevoie de un compilator CSS-in-JS.
+
+## Instalează
+
+Pentru o aplicație React existentă, instalați biblioteca. React 19 este necesar.
+
+```bash
+yarn add roster-ui
+```
+
+[Editorul de cod](/ro/ui/components/code-editor/code-editor) are un punct de intrare separat, `roster-ui/components/code-editor`. Alte componente nu necesită Monaco. Pentru a utiliza editorul de cod, instalați dependențele peer opționale și configurați workerii Monaco pentru bundlerul dvs. înainte de a-l monta:
+
+```bash
+yarn add @monaco-editor/react monaco-editor
+```
+
+Dacă construiți o aplicație roster, urmați [Utilizarea componentelor roster UI](/ro/developers/extend/apps/layout/front-components#using-roster-ui-components). Rendererul componentelor frontale furnizează tema spațiului de lucru și are o configurare diferită de cea a unei aplicații de browser independente. Păstrați `roster-ui`, `roster-sdk` și `roster-client-sdk` la aceeași versiune.
+
+## Încărcați stiluri și furnizați o temă
+
+Importați o dată foaia de stiluri a componentelor și o foaie de stiluri pentru temă la punctul de intrare al aplicației. `ThemeProvider` aplică clasa temei active și pune valorile temei la dispoziția componentelor.
+
+```tsx
+import { Field, Input } from 'roster-ui/primitives/input';
+import { ThemeProvider } from 'roster-ui/theme';
+
+import 'roster-ui/style.css';
+import 'roster-ui/theme-light.css';
+
+export const App = () => (
+  <ThemeProvider colorScheme="light">
+    <Field.Root>
+      <Field.Label>Email</Field.Label>
+      <Input name="email" type="email" placeholder="you@example.com" />
+      <Field.Description>Use your work email address.</Field.Description>
+    </Field.Root>
+  </ThemeProvider>
+);
+```
+
+Foaia de stiluri a componentelor include o resetare globală. Analizați efectul acesteia când adăugați roster UI la o aplicație existentă.
+
+## Suprascrierea stilurilor
+
+roster UI plasează stilurile componentelor și resetarea în stratul de cascadă `roster-ui`. Stilurile pe care le scrieți în afara unui strat, precum un `className`, un modul CSS sau o regulă CSS-in-JS, suprascriu acele reguli stratificate indiferent de specificitatea selectorului sau de ordinea importurilor. Foile de stil ale temei și regulile globale Monaco ale editorului opțional rămân nestratificate.
+
+Resetările globale ale elementelor din aplicația dvs. sunt și ele nestratificate, deci ar suprascrie componentele roster UI. Declarați un strat pentru acestea înainte de încărcarea foii de stil roster UI:
+
+```css
+@layer reset, roster-ui;
+
+@layer reset {
+  button {
+    font: inherit;
+  }
+}
+```
+
+Cu Tailwind CSS v4, plasați roster UI între straturile de bază și de utilitare ale Tailwind:
+
+```css
+@layer theme, base, roster-ui, components, utilities;
+```
+
+## Alegeți un punct de intrare
+
+Importați componente din subcalea lor publică pentru a menține importurile concentrate:
+
+Primitivele sunt controale fundamentale, inclusiv controale compuse precum Select,
+Popover și AlertDialog. Componentele partajate combină primitivele în presetări de design
+recurente și blocuri reutilizabile pentru aplicații. Ambele primesc date și callback-uri
+de la aplicație.
+
+Utilizați [MainButton](/ro/ui/components/input/main-button) pentru acțiuni principale și
+[LightButton](/ro/ui/components/input/light-button) pentru acțiuni ușoare. Ambele
+provin din `roster-ui/components/input` și partajează contractul de interacțiune fundamental al
+[Button](/ro/ui/primitives/input/button). Rutarea și
+aspectul paginii rămân în aplicație.
+
+Fiecare familie de primitive și de componente partajate are un punct de intrare public corespunzător, precum
+`roster-ui/primitives/input` și `roster-ui/components/settings`. Intrările agregate
+`roster-ui/primitives` și `roster-ui/components` exportă familiile respective.
+Intrarea rădăcină `roster-ui` reexportă primitive, componente partajate, pictograme, tokenuri de temă
+și utilitare. Resursele, ajutoarele pentru testare și editorul de cod opțional au puncte de intrare separate.
+
+| Importați                            | Conținut                                                                           |
+| ------------------------------------ | ---------------------------------------------------------------------------------- |
+| `roster-ui/assets`                   | Logo-uri și resurse statice                                                        |
+| `roster-ui/components`               | Toate familiile de componente partajate, cu excepția editorului opțional           |
+| `roster-ui/components/data-display`  | Grupuri de avatare, blocuri de comenzi, arbori JSON, metrici și dale cu pictograme |
+| `roster-ui/components/feedback`      | Indicatoare, bannere în linie și notificări                                        |
+| `roster-ui/components/input`         | Presetări de butoane, intrări specializate, selectoare și controale segmentate     |
+| `roster-ui/components/layout`        | Secțiuni, liste cu depășire și tranziții ale pictogramelor                         |
+| `roster-ui/components/navigation`    | Meniuri derulante, compoziții de meniuri și acțiuni ale filelor                    |
+| `roster-ui/components/settings`      | Rânduri de setări cu controale etichetate                                          |
+| `roster-ui/components/code-editor`   | Editor de cod, antet de editor și utilitare pentru tema editorului                 |
+| `roster-ui/primitives`               | Toate familiile de primitive                                                       |
+| `roster-ui/primitives/accessibility` | Elemente ascunse și ajutoare pentru interacțiunea prin tastatură                   |
+| `roster-ui/primitives/data-display`  | Avatare, insigne, cipuri, etichete, mostre de culori și indicatori de stare        |
+| `roster-ui/primitives/feedback`      | Bannere, indicatori de progres, încărcătoare și structuri-schelet                  |
+| `roster-ui/primitives/input`         | Butoane și controale de formular                                                   |
+| `roster-ui/primitives/layout`        | Extindere, separatoare, direcție și redimensionare                                 |
+| `roster-ui/primitives/navigation`    | Căi de navigare, elemente de listă și file                                         |
+| `roster-ui/primitives/surfaces`      | Carduri, dialoguri, popover-uri și indicații contextuale                           |
+| `roster-ui/primitives/typography`    | Text, titluri, scurtături și text care depășește spațiul disponibil                |
+| `roster-ui/icon`                     | [Pictograme și căutare dinamică](/ro/ui/icons)                                        |
+| `roster-ui/testing`                  | [Decoratori și machete Storybook](/ro/ui/testing)                                     |
+| `roster-ui/theme`                    | Furnizor de temă, hook-uri și referințe la variabile CSS                           |
+| `roster-ui/utilities`                | Hook-uri și utilitare partajate                                                    |
+
+Importați pictograme individuale, precum `IconCheck`, din `roster-ui/icon`. Furnizorul dinamic de pictograme include întregul catalog de pictograme, așadar rezervați-l pentru interfețe care trebuie să caute pictograme la runtime.
+
+## Hook-uri responsive
+
+Importați `useIsMobile`, `useIsTouchDevice` și `useMediaQuery` din `roster-ui/utilities`.
+
+| Hook                   | Interogare                                                        | Folosiți                                                            |
+| ---------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------- |
+| `useIsMobile()`        | `MOBILE_MEDIA_QUERY`, până la și inclusiv `MOBILE_VIEWPORT`       | Alegeți un aspect compact.                                          |
+| `useIsTouchDevice()`   | `TOUCH_DEVICE_MEDIA_QUERY`, `(hover: none) and (pointer: coarse)` | Alegeți comportamentul interacțiunii tactile independent de lățime. |
+| `useMediaQuery(query)` | Orice interogare media acceptată de `window.matchMedia`           | Abonați-vă la o interogare media personalizată.                     |
+
+Constantele de interogare provin din `roster-ui/utilities`; `MOBILE_VIEWPORT` provine din `roster-ui/theme`. Abonamentele partajează un singur `MediaQueryList` pentru fiecare interogare și se actualizează când se modifică potrivirea acesteia. Hook-urile returnează `false` în timpul randării pe server, la prima randare de hidratare și când `window.matchMedia` nu este disponibil.
+
+Într-o [componentă front roster](/ro/developers/extend/apps/layout/front-components#current-limitations), interogările de lățime urmează caseta widgetului. Prin urmare, `useIsMobile` urmează lățimea widgetului, în timp ce `useIsTouchDevice` urmează intrarea principală a dispozitivului. Utilizați [suprascrieri de povești](/ro/ui/testing#media-query-overrides) pentru a testa aceste stări în Storybook.
+
+## Continuă
+
+* [Tematizare](/ro/ui/theming): utilizați tokenuri semantice și suprascrieri cu domeniu de aplicare.
+* [Mod întunecat](/ro/ui/dark-mode): comutați între palete deschise și întunecate.
+
+## Răsfoiește biblioteca
+
+* [Primitive](/ro/ui/primitives/overview): controale fundamentale grupate pe familii, cu exemple de utilizare și referințe API.
+* [Componente](/ro/ui/components/overview): presetări de design partajate și elemente constitutive reutilizabile ale aplicației, compuse din primitive.
+
+<PageBanner illustration="card-page-ui-library" />

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Use roster MCP"
+  short_description: "Query roster MCP and format readable records."
+  default_prompt: "Use $use-roster-mcp to connect Codex to roster MCP or retrieve readable workspace data."

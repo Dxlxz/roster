@@ -1,0 +1,64 @@
+import { buildResultSchema } from './build-result-schema';
+import { disableAutomaticTriggersOrThrow } from './disable-automatic-triggers-or-throw';
+import { runroster } from './run-roster';
+
+function validateEnvironmentOrThrow(): { apiUrl: string; apiKey: string } {
+  const apiUrl = process.env.roster_API_URL;
+  const apiKey = process.env.roster_API_KEY;
+
+  if (!apiUrl || !apiKey) {
+    throw new Error(
+      'roster_API_URL and roster_API_KEY must be set.\n' +
+        'Or set them in vitest env config.',
+    );
+  }
+
+  return { apiUrl, apiKey };
+}
+
+async function checkServerOrThrow(apiUrl: string) {
+  const response = await fetch(`${apiUrl}/healthz`).catch(() => {
+    throw new Error(
+      `roster server is not reachable at ${apiUrl}. ` +
+        'Make sure the server is running before executing integration tests.',
+    );
+  });
+
+  if (!response.ok) {
+    throw new Error(`Server at ${apiUrl} returned ${response.status}`);
+  }
+}
+
+export async function setup() {
+  const { apiUrl } = validateEnvironmentOrThrow();
+
+  await checkServerOrThrow(apiUrl);
+  await teardown();
+
+  const build = await runroster(['app', 'build']);
+
+  if (!build.ok) {
+    throw new Error('Could not build the call-recorder manifest');
+  }
+
+  const { manifest } = buildResultSchema.parse(build.data);
+  const result = await runroster(['app', 'apply', '--create']);
+
+  if (!result.ok) {
+    throw new Error(
+      `App apply failed: ${result.error.code} ${result.error.message}`,
+    );
+  }
+
+  await disableAutomaticTriggersOrThrow(manifest);
+}
+
+export async function teardown() {
+  const result = await runroster(['app', 'uninstall', '--yes']);
+
+  if (!result.ok && result.error.code !== 'APP_NOT_INSTALLED') {
+    throw new Error(
+      `App uninstall failed: ${result.error.code} ${result.error.message}`,
+    );
+  }
+}

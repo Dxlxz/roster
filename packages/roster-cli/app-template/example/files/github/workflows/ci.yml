@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request: {}
+
+permissions:
+  contents: read
+
+env:
+  roster_VERSION: latest
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Spawn roster test instance
+        id: roster
+        uses: Dxlxz/roster/.github/actions/spawn-roster-app-dev-test@main
+        with:
+          roster-version: ${{ env.roster_VERSION }}
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: yarn
+
+      - name: Install roster CLI
+        run: npm install -g roster@CLI-VERSION-TO-BE-GENERATED
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Typecheck
+        run: yarn typecheck
+
+      - name: Unit tests
+        run: yarn test:unit
+
+      - name: Run integration tests
+        run: yarn test
+        env:
+          roster_API_URL: ${{ steps.roster.outputs.server-url }}
+          roster_API_KEY: ${{ steps.roster.outputs.api-key }}

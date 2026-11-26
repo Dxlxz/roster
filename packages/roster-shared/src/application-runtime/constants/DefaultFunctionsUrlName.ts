@@ -1,0 +1,1 @@
+export const DEFAULT_FUNCTIONS_URL_NAME = 'roster_FUNCTIONS_URL';

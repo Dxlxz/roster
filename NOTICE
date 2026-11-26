@@ -1,0 +1,18 @@
+Roster
+Copyright 2026 Dale Jeffrey Gilimon
+
+This product includes software developed as Twenty
+(https://github.com/twentyhq/twenty), released under the GNU Affero
+General Public License v3.0, with certain files under a commercial
+license as marked in LICENSE.
+
+Modifications in this distribution: the package names and npm scope were
+renamed (twenty-* -> roster-*, @twentyhq -> @roster), the environment
+prefix changed to ROSTER_*, the brand assets, README and CI rebuilt, and
+the required Node range widened from ^26.5.1 to >=22.14.0 so the project
+installs and builds on the LTS line.
+
+Files carrying the upstream `/* @license Enterprise */` marker keep their
+commercial terms; everything else here is AGPL-3.0.
+
+The full license text is in LICENSE.

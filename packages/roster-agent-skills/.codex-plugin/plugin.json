@@ -1,0 +1,45 @@
+{
+  "name": "roster",
+  "version": "0.1.0",
+  "description": "Create, operate, develop, publish, and query roster apps through Codex.",
+  "author": {
+    "name": "roster PBC",
+    "url": "https://roster.dev/"
+  },
+  "homepage": "https://docs.roster.dev/",
+  "repository": "https://github.com/Dxlxz/roster",
+  "license": "AGPL-3.0",
+  "keywords": [
+    "roster",
+    "mcp",
+    "oauth",
+    "crm",
+    "apps",
+    "scaffolding",
+    "cli",
+    "roster-sdk",
+    "publishing"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "roster",
+    "shortDescription": "Create, develop, publish, and query apps",
+    "longDescription": "Scaffold, develop, deploy, and publish roster apps end-to-end. Five focused skills cover app creation, entity development (objects, fields, logic, layouts, front components), remote/sync/deploy operations, marketplace publishing assets, and workspace data retrieval via MCP. The bundled roster docs MCP server keeps guidance current, and the setup helper wires per-user workspace MCP with OAuth in one command.",
+    "developerName": "roster PBC",
+    "category": "Coding",
+    "capabilities": ["Interactive", "Read", "Write"],
+    "websiteURL": "https://roster.dev/",
+    "privacyPolicyURL": "https://roster.dev/privacy-policy",
+    "termsOfServiceURL": "https://roster.dev/terms",
+    "defaultPrompt": [
+      "Create and run a new roster app",
+      "Push a roster app to production",
+      "Develop a roster app feature"
+    ],
+    "brandColor": "#000000",
+    "composerIcon": "./assets/roster-logo.svg",
+    "logo": "./assets/roster-logo.png",
+    "screenshots": []
+  }
+}

@@ -1,0 +1,130 @@
+---
+title: CLI
+description: Fonksiyonları çalıştırmak, günlükleri akış olarak izlemek, uygulama kurulumlarını yönetmek ve uzaklar arasında geçiş yapmak için yarn roster komutları.
+---
+
+`yarn roster` CLI, uygulama ile ilgili her şey için arayüzünüzdür. Tam komut listesi:
+
+| Komut                                           | Ne yapar                                                                              | Şurada belgelenmiştir                                                                                      |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `dev`                                           | Kaynak dosyaları izleyin ve değişiklikleri gerçek zamanlı olarak eşitleyin            | [Hızlı Başlangıç](/tr/developers/extend/apps/getting-started/quick-start)                                     |
+| `plan`                                          | Meta veri değişikliklerini uygulamadan önizleyin                                      | [Senkronizasyon ve kurtarma](/tr/developers/extend/apps/operations/sync-and-recovery#previewing-changes-plan) |
+| `apply`                                         | Planı gösterdikten sonra meta veri değişikliklerini uygulayın                         | [Senkronizasyon ve kurtarma](/tr/developers/extend/apps/operations/sync-and-recovery)                         |
+| `dev:build`                                     | Uygulamayı derleyin ve API istemcisini oluşturun (`.tgz` paketlemek için `--tarball`) | [Yayınlama](/tr/developers/extend/apps/operations/publishing)                                                 |
+| `dev:typecheck`                                 | TypeScript tür kontrolünü çalıştırın                                                  | [Testing](/tr/developers/extend/apps/operations/testing)                                                      |
+| `dev:add`                                       | Yeni bir varlık iskeleti oluşturun                                                    | [İskele oluşturma](/tr/developers/extend/apps/getting-started/scaffolding)                                    |
+| `dev:generate-client`                           | Türlendirilmiş API istemcisini yeniden oluşturun                                      | bu sayfa                                                                                                   |
+| `dev:function:exec` / `dev:function:logs`       | Fonksiyonları çalıştırın ve günlüklerini akış halinde alın                            | bu sayfa                                                                                                   |
+| `dev:translations-extract`                      | Çevrilebilir dizeleri `locales/` kataloglarına çıkarın                                | [Çeviriler](/tr/developers/extend/apps/operations/translations)                                                 |
+| `dev:catalog-sync`                              | Pazar yeri katalog eşitlemesini tetikleyin                                            | [Yayınlama](/tr/developers/extend/apps/operations/publishing#how-marketplace-discovery-works)                 |
+| `app:publish` / `app:install` / `app:uninstall` | Sürüm yaşam döngüsü                                                                   | [Yayınlama](/tr/developers/extend/apps/operations/publishing) ve bu sayfa                                     |
+| `docker:*`                                      | Yerel roster sunucu konteynerini yönetin                                              | [Yerel Sunucu](/tr/developers/extend/apps/getting-started/local-server)                                       |
+| `remote:*`                                      | Sunucu bağlantılarını yönetin                                                         | bu sayfa                                                                                                   |
+
+Her komut, varsayılan yerine belirli bir uzak sunucuyu hedeflemek için `-r, --remote \<name>` parametresini kabul eder.
+
+## Fonksiyonları çalıştırma (`yarn roster dev:function:exec`)
+
+Bir mantık fonksiyonunu HTTP, cron veya veritabanı olayıyla tetiklemeden manuel olarak çalıştırın:
+
+```bash filename="Terminal"
+# Execute by function name
+yarn roster dev:function:exec -n create-new-post-card
+
+# Execute by universalIdentifier
+yarn roster dev:function:exec -u e56d363b-0bdc-4d8a-a393-6f0d1c75bdcf
+
+# Pass a JSON payload
+yarn roster dev:function:exec -n create-new-post-card -p '{"name": "Hello"}'
+
+# Execute the install and uninstall hooks
+yarn roster dev:function:exec --postInstall
+yarn roster dev:function:exec --preInstall
+yarn roster dev:function:exec --uninstall
+```
+
+## Fonksiyon günlüklerini görüntüleme (`yarn roster dev:function:logs`)
+
+Uygulamanızın mantık fonksiyonlarının yürütme günlüklerini akış olarak alın:
+
+```bash filename="Terminal"
+# Stream all function logs
+yarn roster dev:function:logs
+
+# Filter by function name
+yarn roster dev:function:logs -n create-new-post-card
+
+# Filter by universalIdentifier
+yarn roster dev:function:logs -u e56d363b-0bdc-4d8a-a393-6f0d1c75bdcf
+```
+
+<Note>
+Bu, Docker konteyner günlüklerini gösteren `yarn roster docker:logs` komutundan farklıdır. `yarn roster dev:function:logs`, uygulamanızın fonksiyon yürütme günlüklerini roster sunucusundan gösterir.
+</Note>
+
+## Tiplendirilmiş istemciyi oluşturma (`yarn roster dev:generate-client`)
+
+Bir uygulamayı oluşturup eşitlemeden, etkin uzak sunucunun şemasından tiplendirilmiş API istemcisini (`roster-client-sdk`) yeniden oluşturun. Bunu, roster örneğinizle iletişim kuran — örneğin ayrı bir depoda bulunan bir arka uç hizmeti — herhangi bir projede tiplendirilmiş bir istemci edinmek için kullanın:
+
+```bash filename="Terminal"
+# In your project (no roster app definition required)
+yarn add roster-sdk roster-client-sdk
+
+# Connect to the roster instance to generate the client from
+yarn roster remote:add
+
+# Generate the typed client into node_modules/roster-client-sdk
+yarn roster dev:generate-client
+```
+
+Ardından istemciyi kodunuza içe aktarın:
+
+```typescript
+import { CoreApiClient } from 'roster-client-sdk/core';
+```
+
+Oluşturulan türleri yenilemek için veri modeliniz her değiştiğinde komutu yeniden çalıştırın.
+
+<Note>
+İstemci `node_modules` içinde oluşturulur, bu nedenle kodunuzla birlikte commit edilmez. Her kurulumdan sonra (örneğin bir `postinstall` betiğinde veya CI içinde) `yarn roster dev:generate-client` komutunu çalıştırın.
+</Note>
+
+## Bir uygulamayı kaldırma (`yarn roster app:uninstall`)
+
+Uygulamanızı etkin çalışma alanından kaldırın:
+
+```bash filename="Terminal"
+yarn roster app:uninstall
+
+# Skip the confirmation prompt
+yarn roster app:uninstall --yes
+```
+
+## Uzakları yönetme
+
+Bir **uzak**, uygulamanızın bağlandığı roster sunucusudur. Kurulum sırasında iskelet oluşturucu sizin için otomatik olarak bir tane oluşturur. Dilediğiniz zaman daha fazla uzak ekleyebilir veya aralarında geçiş yapabilirsiniz.
+
+```bash filename="Terminal"
+# Add a new remote (opens a browser for OAuth login)
+yarn roster remote:add
+
+# Connect to a local roster server (auto-detects port 2020 or 3000)
+yarn roster remote:add --local
+
+# Add a remote non-interactively (useful for CI)
+yarn roster remote:add --url https://your-roster-server.com --api-key $roster_API_KEY --as my-remote
+
+# List all configured remotes
+yarn roster remote:list
+
+# Set the active remote
+yarn roster remote:use <name>
+
+# Check that the active remote's authentication is still valid
+yarn roster remote:status
+
+# Remove a remote
+yarn roster remote:remove <name>
+```
+
+Kimlik bilgileriniz `~/.roster/config.json` içinde saklanır.

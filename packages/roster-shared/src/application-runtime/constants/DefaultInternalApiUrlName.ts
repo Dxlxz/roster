@@ -1,0 +1,1 @@
+export const DEFAULT_INTERNAL_API_URL_NAME = 'roster_INTERNAL_API_URL';

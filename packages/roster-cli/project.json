@@ -1,0 +1,42 @@
+{
+  "name": "roster-cli",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/roster-cli/src",
+  "projectType": "application",
+  "tags": ["scope:cli"],
+  "implicitDependencies": ["roster-sdk"],
+  "targets": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["{projectRoot}/dist"]
+    },
+    "start": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
+      "options": {
+        "cwd": "packages/roster-cli",
+        "command": "node dist/cli.cjs"
+      }
+    },
+    "typecheck": {},
+    "lint": {},
+    "test:package": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
+      "cache": false,
+      "options": {
+        "command": "node --test packages/roster-cli/scripts/test-npm-resolution.mjs packages/roster-cli/scripts/test-check-publish.mjs packages/roster-cli/scripts/test-template-lock.mjs packages/roster-cli/scripts/test-package.mjs"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["default", "^default"],
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "vitest run --config ./vitest.config.ts"
+      }
+    }
+  }
+}

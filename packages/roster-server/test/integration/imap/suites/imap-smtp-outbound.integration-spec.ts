@@ -1,0 +1,198 @@
+import { randomUUID } from 'node:crypto';
+
+import { EmailConnectionSecurity } from 'src/engine/core-modules/imap-smtp-caldav-connection/enums/email-connection-security.enum';
+import { WORKSPACE_MEMBER_DATA_SEED_IDS } from 'src/engine/workspace-manager/dev-seeder/data/constants/workspace-member-data-seeds.constant';
+import { MessageChannelEntity } from 'src/engine/metadata-modules/message-channel/entities/message-channel.entity';
+import { deleteConnectedAccount } from 'test/integration/metadata/suites/connected-account/utils/delete-connected-account.util';
+import { saveImapSmtpCaldavAccount } from 'test/integration/metadata/suites/connected-account/utils/save-imap-smtp-caldav-account.util';
+import { updateConfigVariable } from 'test/integration/roster-config/utils/update-config-variable.util';
+import { findRecordNodesByFilter } from 'test/integration/utils/find-records-by-filter.util';
+import { getCoreRepository } from 'test/integration/utils/get-core-repository.util';
+import { runMessageChannelSync } from 'test/integration/utils/run-message-channel-sync.util';
+import { sendEmail } from 'test/integration/utils/send-email.util';
+import {
+  type GreenmailServer,
+  startGreenmailContainer,
+} from 'test/integration/utils/start-greenmail-container.util';
+import { serializeEmailBody } from 'test/integration/utils/serialize-email-body.util';
+import {
+  grantRoleWideAccessToChannelObjects,
+  revokeRoleWideAccessToChannelObjects,
+} from 'test/integration/utils/role-wide-access-to-channel-objects.util';
+
+const PASSWORD = 'greenmail-password';
+const HANDLE = `imap-smtp-outbound-${randomUUID()}@acme.test`;
+
+describe('IMAP/SMTP outbound messaging (integration)', () => {
+  let greenmail: GreenmailServer;
+  let connectedAccountId: string;
+  let messageChannelId: string;
+
+  beforeAll(async () => {
+    await grantRoleWideAccessToChannelObjects();
+    greenmail = await startGreenmailContainer({
+      username: HANDLE,
+      password: PASSWORD,
+    });
+
+    await updateConfigVariable({
+      input: {
+        key: 'OUTBOUND_HTTP_ALLOWED_INTERNAL_HOSTS',
+        value: [greenmail.host],
+      },
+    });
+
+    const { data } = await saveImapSmtpCaldavAccount({
+      input: {
+        handle: HANDLE,
+        connectionParameters: {
+          IMAP: {
+            host: greenmail.host,
+            port: greenmail.imapPort,
+            username: HANDLE.split('@')[0],
+            password: PASSWORD,
+            connectionSecurity: EmailConnectionSecurity.NONE,
+          },
+          SMTP: {
+            host: greenmail.host,
+            port: greenmail.smtpPort,
+            username: HANDLE.split('@')[0],
+            password: PASSWORD,
+            connectionSecurity: EmailConnectionSecurity.NONE,
+          },
+        },
+      },
+      expectToFail: false,
+    });
+
+    connectedAccountId = data.connectedAccountId;
+    messageChannelId = (
+      await getCoreRepository<MessageChannelEntity>(
+        MessageChannelEntity,
+      ).findOneByOrFail({ connectedAccountId })
+    ).id;
+
+    await runMessageChannelSync(messageChannelId);
+  }, 300000);
+
+  afterAll(async () => {
+    await updateConfigVariable({
+      input: { key: 'OUTBOUND_HTTP_ALLOWED_INTERNAL_HOSTS', value: [] },
+    }).catch(() => undefined);
+
+    if (connectedAccountId) {
+      await deleteConnectedAccount({
+        id: connectedAccountId,
+        expectToFail: false,
+      }).catch(() => undefined);
+    }
+
+    await greenmail?.stop().catch(() => undefined);
+    await revokeRoleWideAccessToChannelObjects();
+  });
+
+  it('sends a threaded SMTP message through GraphQL and persists it', async () => {
+    const subject = `IMAP/SMTP outbound ${randomUUID()}`;
+
+    const result = await sendEmail({
+      connectedAccountId,
+      to: HANDLE,
+      cc: HANDLE,
+      bcc: HANDLE,
+      subject,
+      body: serializeEmailBody({
+        type: 'html',
+        html: '<p>SMTP reply body</p>',
+      }),
+      inReplyTo: '<smtp-parent@example.com>',
+    });
+
+    expect(result).toMatchObject({ success: true });
+
+    const [message] = await findRecordNodesByFilter<{
+      id: string;
+      isDraft: boolean;
+      messageThreadId: string | null;
+      text: string | null;
+      createdBy: { workspaceMemberId: string | null };
+    }>(
+      'message',
+      'messages',
+      'id isDraft messageThreadId text createdBy { workspaceMemberId }',
+      { subject: { eq: subject } },
+    );
+
+    const createdBy = {
+      workspaceMemberId: WORKSPACE_MEMBER_DATA_SEED_IDS.JANE,
+    };
+
+    expect(message).toMatchObject({
+      isDraft: false,
+      messageThreadId: expect.any(String),
+      text: 'SMTP reply body',
+      createdBy,
+    });
+    expect(
+      await findRecordNodesByFilter(
+        'messageThread',
+        'messageThreads',
+        'createdBy { workspaceMemberId }',
+        { id: { eq: message.messageThreadId } },
+      ),
+    ).toEqual([{ createdBy }]);
+    expect(
+      await findRecordNodesByFilter<{
+        messageChannelId: string;
+      }>(
+        'messageChannelMessageAssociation',
+        'messageChannelMessageAssociations',
+        'messageChannelId createdBy { workspaceMemberId }',
+        { messageId: { eq: message.id } },
+      ),
+    ).toEqual([expect.objectContaining({ messageChannelId, createdBy })]);
+    expect(
+      await findRecordNodesByFilter<{ handle: string; role: string }>(
+        'messageParticipant',
+        'messageParticipants',
+        'handle role createdBy { workspaceMemberId }',
+        { messageId: { eq: message.id } },
+      ),
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ handle: HANDLE, role: 'TO', createdBy }),
+        expect.objectContaining({ handle: HANDLE, role: 'CC', createdBy }),
+        expect.objectContaining({ handle: HANDLE, role: 'BCC', createdBy }),
+      ]),
+    );
+  }, 300000);
+
+  it('refuses to send from an address the account has not verified', async () => {
+    const subject = `IMAP/SMTP rejected sender ${randomUUID()}`;
+
+    const result = await sendEmail({
+      connectedAccountId,
+      fromHandle: 'not-my-alias@acme.test',
+      to: HANDLE,
+      subject,
+      body: serializeEmailBody({
+        type: 'html',
+        html: '<p>SMTP rejected body</p>',
+      }),
+    });
+
+    expect(result).toMatchObject({
+      success: false,
+      error: 'You cannot send from this address.',
+    });
+    expect(
+      await findRecordNodesByFilter<{ id: string }>(
+        'message',
+        'messages',
+        'id',
+        {
+          subject: { eq: subject },
+        },
+      ),
+    ).toEqual([]);
+  }, 300000);
+});

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 160" width="880" height="160" role="img" aria-label="Roster">
+  <title>Roster</title>
+  <g fill="#b45309">
+    <rect x="16" y="30" width="108" height="22" rx="6"/>
+    <rect x="16" y="64" width="84" height="22" rx="6" opacity="0.65"/>
+    <rect x="16" y="98" width="66" height="22" rx="6" opacity="0.4"/>
+  </g>
+  <g fill="#b45309">
+    <circle cx="146" cy="41" r="8" opacity="0.9"/>
+    <circle cx="146" cy="75" r="8" opacity="0.55"/>
+    <circle cx="146" cy="109" r="8" opacity="0.3"/>
+  </g>
+  <text x="184" y="122" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="104" font-weight="700" fill="#451a03" letter-spacing="-3">roster</text>
+</svg>

@@ -1,0 +1,33 @@
+---
+title: Создание каркаса
+description: Создавайте сущности приложения с помощью команды добавления приложения.
+---
+
+import { PageBanner } from "/snippets/page-banner.mdx"
+
+## Обзор
+
+Используйте автономный CLI для создания объекта, поля, логической функции или внешнего компонента:
+
+```bash
+roster app add
+roster app add object --name invoice --name-plural invoices --no-input
+roster app add field --name amount --type NUMBER --object <object-uuid> --no-input
+roster app add logic-function --name send-invoice --no-input
+roster app add front-component --name invoice-panel --no-input
+```
+
+Без флагов интерактивные терминалы запрашивают недостающие значения. Для скриптов и агентов укажите обязательные поля и используйте `--no-input` или `--json`.
+
+При создании объекта также можно создать представление, элемент навигации и макет страницы записи:
+
+```bash
+roster app add object --name invoice --name-plural invoices \
+  --create-view --create-navigation-menu-item --create-page-layout --no-input
+```
+
+Для других типов сущностей создайте соответствующий файл `define*`, используя `roster-sdk/define` и действительный UUID v4. Перед синхронизацией выполните `roster app typecheck` и `roster app plan`.
+
+`--path` выбирает каталог приложения, а не пользовательскую выходную папку. Выполните `roster app add --help`, чтобы просмотреть поддерживаемые параметры.
+
+<PageBanner illustration="dev-contribute" />

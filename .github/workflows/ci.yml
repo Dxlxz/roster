@@ -1,0 +1,22 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install
+        run: node .yarn/releases/yarn-4.18.1.cjs install --immutable
+      - name: Lint
+        run: node .yarn/releases/yarn-4.18.1.cjs nx run-many -t lint --projects=roster-shared
+      - name: Unit tests
+        run: node .yarn/releases/yarn-4.18.1.cjs nx run-many -t test --projects=roster-shared

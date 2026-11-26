@@ -1,0 +1,45 @@
+import { Injectable } from '@nestjs/common';
+
+import { type VerifyCallback } from 'passport-google-oauth20';
+import { parseJson } from 'roster-shared/utils';
+
+import { MicrosoftAPIsOauthCommonStrategy } from 'src/engine/core-modules/auth/strategies/microsoft-apis-oauth-common.auth.strategy';
+import { type APIsOAuthRequest } from 'src/engine/core-modules/auth/types/apis-oauth-request.type';
+import { type PlaintextString } from 'src/engine/core-modules/secret-encryption/branded-strings/plaintext-string.type';
+import { type APIsOAuthState } from 'src/engine/core-modules/auth/types/apis-oauth-state.type';
+import { type MicrosoftPassportProfile } from 'src/engine/core-modules/auth/types/microsoft-passport-profile.type';
+import { rosterConfigService } from 'src/engine/core-modules/roster-config/roster-config.service';
+
+@Injectable()
+export class MicrosoftAPIsOauthExchangeCodeForTokenStrategy extends MicrosoftAPIsOauthCommonStrategy {
+  constructor(rosterConfigService: rosterConfigService) {
+    super(rosterConfigService);
+  }
+
+  async validate(
+    request: APIsOAuthRequest,
+    accessToken: PlaintextString,
+    refreshToken: PlaintextString,
+    profile: MicrosoftPassportProfile,
+    done: VerifyCallback,
+  ): Promise<void> {
+    const { name, emails, photos } = profile;
+    const state = parseJson<APIsOAuthState>(request.query.state as string);
+
+    const user: APIsOAuthRequest['user'] = {
+      emails: emails ?? [],
+      firstName: name?.givenName,
+      lastName: name?.familyName,
+      picture: photos?.[0]?.value ?? null,
+      accessToken,
+      refreshToken,
+      transientToken: state?.transientToken ?? '',
+      redirectLocation: state?.redirectLocation,
+      calendarVisibility: state?.calendarVisibility,
+      messageVisibility: state?.messageVisibility,
+      skipMessageChannelConfiguration: state?.skipMessageChannelConfiguration,
+    };
+
+    done(null, user);
+  }
+}

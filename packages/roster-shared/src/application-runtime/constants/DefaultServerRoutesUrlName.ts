@@ -1,0 +1,1 @@
+export const DEFAULT_SERVER_ROUTES_URL_NAME = 'roster_SERVER_ROUTES_URL';

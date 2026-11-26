@@ -1,0 +1,71 @@
+#!/bin/bash
+set -e
+if [ ! -f "$(dirname "$0")/.env" ]; then
+    echo "Error: .env file not found"
+    exit 1
+fi
+source "$(dirname "$0")/.env"
+
+## steps to cleanup and start over from scratch - useful when testing
+#podman pod stop roster-pod
+#podman pod rm roster-pod
+#podman volume rm roster-db-data roster-server-data roster-redis-data
+# end of cleanup
+
+podman volume create roster-db-data
+podman volume create roster-server-data
+podman volume create roster-redis-data
+
+podman pod create --name roster-pod -p 127.0.0.1:8080:3000
+
+podman run -d --pod roster-pod --name roster-db \
+  -e POSTGRES_DB=roster \
+  -e POSTGRES_USER=roster \
+  -e POSTGRES_PASSWORD="$POSTGRES_PASSWORD" \
+  -v roster-db-data:/var/lib/postgresql/data:Z \
+  docker.io/library/postgres:16
+
+podman run -d --pod roster-pod --name roster-redis \
+  -v roster-redis-data:/data:Z \
+  docker.io/library/redis:latest
+
+podman run -d --pod roster-pod --name roster-server \
+  -e NODE_PORT=3000 \
+  -e SERVER_URL="$SERVER_URL" \
+  -e PG_DATABASE_URL="postgresql://roster:$POSTGRES_PASSWORD@roster-db:5432/roster" \
+  -e REDIS_URL="redis://roster-redis:6379" \
+  -e APP_SECRET="$APP_SECRET" \
+  -e NODE_ENV=production \
+  -e LOG_LEVEL=info \
+  -v roster-server-data:/app/docker-data:Z \
+  docker.io/rostercrm/roster:latest
+
+podman run -d --pod roster-pod --name roster-worker \
+  --init \
+  -e SERVER_URL="$SERVER_URL" \
+  -e PG_DATABASE_URL="postgresql://roster:$POSTGRES_PASSWORD@roster-db:5432/roster" \
+  -e REDIS_URL="redis://roster-redis:6379" \
+  -e APP_SECRET="$APP_SECRET" \
+  -e DISABLE_DB_MIGRATIONS=true \
+  -e NODE_ENV=production \
+  -e LOG_LEVEL=info \
+  -v roster-server-data:/app/docker-data:Z \
+  docker.io/rostercrm/roster:latest \
+  yarn worker:prod
+
+# wait some time, check status
+sleep 30
+podman ps --pod -f name=roster-pod
+
+
+mkdir -p ~/.config/systemd/user
+if [ ! -f "rostercrm.service" ]; then
+    echo "Error: rostercrm.service file not found"
+    exit 1
+fi
+cp rostercrm.service ~/.config/systemd/user
+
+systemctl --user daemon-reload
+systemctl --user enable rostercrm.service
+systemctl --user start rostercrm.service
+

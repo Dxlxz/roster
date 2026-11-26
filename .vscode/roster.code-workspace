@@ -1,0 +1,150 @@
+{
+  "folders": [
+    {
+      "name": "ROOT",
+      "path": "../"
+    },
+    {
+      "name": "packages/roster-docker",
+      "path": "../packages/roster-docker"
+    },
+    {
+      "name": "packages/roster-front",
+      "path": "../packages/roster-front"
+    },
+    {
+      "name": "packages/roster-ui",
+      "path": "../packages/roster-ui"
+    },
+    {
+      "name": "packages/roster-emails",
+      "path": "../packages/roster-emails"
+    },
+    {
+      "name": "packages/roster-shared",
+      "path": "../packages/roster-shared"
+    },
+    {
+      "name": "packages/roster-server",
+      "path": "../packages/roster-server"
+    },
+    {
+      "name": "packages/roster-utils",
+      "path": "../packages/roster-utils"
+    },
+    {
+      "name": "packages/roster-zapier",
+      "path": "../packages/roster-zapier"
+    },
+    {
+      "name": "packages/roster-oxlint-rules",
+      "path": "../packages/roster-oxlint-rules"
+    },
+    {
+      "name": "packages/roster-e2e-testing",
+      "path": "../packages/roster-e2e-testing"
+    },
+    {
+      "name": "packages/roster-docs",
+      "path": "../packages/roster-docs"
+    },
+    {
+      "name": "packages/create-roster-app",
+      "path": "../packages/create-roster-app"
+    },
+    {
+      "name": "packages/roster-apps",
+      "path": "../packages/roster-apps"
+    },
+    {
+      "name": "packages/roster-claude-skills",
+      "path": "../packages/roster-claude-skills"
+    },
+    {
+      "name": "packages/roster-cli",
+      "path": "../packages/roster-cli"
+    },
+    {
+      "name": "packages/roster-client-sdk",
+      "path": "../packages/roster-client-sdk"
+    },
+    {
+      "name": "packages/roster-front-component-renderer",
+      "path": "../packages/roster-front-component-renderer"
+    },
+    {
+      "name": "packages/roster-sdk",
+      "path": "../packages/roster-sdk"
+    },
+    {
+      "name": "packages/roster-website",
+      "path": "../packages/roster-website"
+    }
+  ],
+  "settings": {
+    "editor.formatOnSave": false,
+    "files.eol": "auto",
+    "[typescript]": {
+      "editor.formatOnSave": true,
+      "editor.defaultFormatter": "esbenp.prettier-vscode",
+      "editor.codeActionsOnSave": {
+        "source.fixAll.oxc": "explicit",
+        "source.addMissingImports": "always"
+      }
+    },
+    "[javascript]": {
+      "editor.formatOnSave": true,
+      "editor.defaultFormatter": "esbenp.prettier-vscode",
+      "editor.codeActionsOnSave": {
+        "source.fixAll.oxc": "explicit",
+        "source.addMissingImports": "always"
+      }
+    },
+    "[typescriptreact]": {
+      "editor.formatOnSave": true,
+      "editor.defaultFormatter": "esbenp.prettier-vscode",
+      "editor.codeActionsOnSave": {
+        "source.fixAll.oxc": "explicit",
+        "source.addMissingImports": "always"
+      }
+    },
+    "[json]": {
+      "editor.formatOnSave": true
+    },
+    "javascript.format.enable": false,
+    "typescript.format.enable": false,
+    "cSpell.enableFiletypes": [
+      "!javascript",
+      "!json",
+      "!typescript",
+      "!typescriptreact",
+      "md",
+      "mdx"
+    ],
+    "cSpell.words": [
+      "rosterhq"
+    ],
+    "typescript.preferences.importModuleSpecifier": "non-relative",
+    "[javascript][typescript][typescriptreact]": {
+      "editor.codeActionsOnSave": {
+        "source.fixAll.oxc": "explicit",
+        "source.addMissingImports": "always"
+      }
+    },
+    "search.exclude": {
+      "**/.yarn": true,
+    },
+    "files.exclude": {
+      "packages/": true
+    },
+    "oxc.lint.enable": true,
+    "jest.runMode": "on-demand",
+    "jest.disabledWorkspaceFolders": [
+      "ROOT",
+      "packages/roster-zapier",
+      "packages/roster-docker",
+      "packages/roster-utils",
+      "packages/roster-postgres"
+    ]
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "rules": {
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "group": ["roster-shared", "roster-shared/*"],
+            "message": "roster-apps applications must not import from roster-shared directly. Import the runtime types and helpers you need from roster-sdk instead so the app bundle stays minimal."
+          }
+        ]
+      }
+    ]
+  }
+}

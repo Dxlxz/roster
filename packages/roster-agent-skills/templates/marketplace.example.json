@@ -1,0 +1,20 @@
+{
+  "name": "roster-local",
+  "interface": {
+    "displayName": "roster Local"
+  },
+  "plugins": [
+    {
+      "name": "roster",
+      "category": "Coding",
+      "source": {
+        "source": "local",
+        "path": "./packages/roster-agent-skills/dist"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      }
+    }
+  ]
+}

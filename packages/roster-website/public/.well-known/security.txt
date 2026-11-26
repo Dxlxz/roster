@@ -1,0 +1,5 @@
+Contact: https://github.com/Dxlxz/roster/issues/new
+Contact: security@roster.dev
+Preferred-Languages: en
+Canonical: https://roster.dev/.well-known/security.txt
+Policy: https://github.com/Dxlxz/roster/security/policy

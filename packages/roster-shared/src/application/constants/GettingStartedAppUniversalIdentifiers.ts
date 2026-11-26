@@ -1,0 +1,7 @@
+import { roster_PUBLIC_APP_UNIVERSAL_IDENTIFIERS } from '@/application/constants/rosterPublicAppUniversalIdentifiers';
+
+export const GETTING_STARTED_APP_UNIVERSAL_IDENTIFIERS = [
+  roster_PUBLIC_APP_UNIVERSAL_IDENTIFIERS.SLACK,
+  roster_PUBLIC_APP_UNIVERSAL_IDENTIFIERS.TEAMS,
+  roster_PUBLIC_APP_UNIVERSAL_IDENTIFIERS.FATHOM,
+] as const;

@@ -1,0 +1,11 @@
+import { FRONT_COMPONENT_UI_IMPORTS } from 'roster-shared/front-component-build';
+import { FRONT_COMPONENT_CORE_API_CLIENT_IMPORT_SPECIFIER } from 'src/engine/metadata-modules/ai/ai-front-component/constants/front-component-core-api-client-import-specifier.constant';
+
+export const FRONT_COMPONENT_ALLOWED_IMPORTS = [
+  FRONT_COMPONENT_CORE_API_CLIENT_IMPORT_SPECIFIER,
+  'roster-sdk/front-component',
+  'react',
+  'react-dom',
+  'react/jsx-runtime',
+  ...FRONT_COMPONENT_UI_IMPORTS,
+];

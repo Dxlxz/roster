@@ -1,0 +1,3 @@
+#!/bin/sh
+cd /app/packages/roster-server
+exec yarn start:prod

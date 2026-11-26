@@ -1,0 +1,82 @@
+---
+title: أوامر
+description: أوامر مفيدة لتطوير roster.
+---
+
+import { PageBanner } from "/snippets/page-banner.mdx"
+
+## نظرة عامة
+
+يمكن تشغيل الأوامر من جذر المستودع باستخدام `npx nx`. استخدم `npx nx run {project}:{command}` للاستهداف الصريح.
+
+## بدء التطبيق
+
+```bash
+npx nx start roster-front          # Frontend dev server (http://localhost:3001)
+npx nx start roster-server         # Backend server (http://localhost:3000)
+npx nx run roster-server:worker    # Background worker
+```
+
+## قاعدة البيانات
+
+```bash
+npx nx database:reset roster-server                          # Reset and seed database
+npx nx run roster-server:database:migrate:prod               # Run migrations
+npx nx run roster-server:database:migrate:generate --name <name> --type <fast|slow>  # Generate a migration
+```
+
+## فحص الشيفرة
+
+```bash
+npx nx lint:diff-with-main roster-front    # Lint changed files (fastest)
+npx nx lint:diff-with-main roster-server
+npx nx lint roster-front --configuration=fix  # Auto-fix
+```
+
+## التحقق من الأنواع
+
+```bash
+npx nx typecheck roster-front
+npx nx typecheck roster-server
+```
+
+## الاختبار
+
+```bash
+# Frontend
+npx nx test roster-front                          # Jest unit tests
+npx nx storybook:build roster-front               # Build Storybook
+npx nx storybook:test roster-front                # Storybook tests
+
+# Backend
+npx nx run roster-server:test:unit                # Unit tests
+npx nx run roster-server:test:integration         # Integration tests
+npx nx run roster-server:test:integration:with-db-reset  # Integration with DB reset
+
+# Single file (fastest)
+npx jest path/to/test.test.ts --config=packages/{project}/jest.config.mjs
+```
+
+## جراف كيو إل
+
+```bash
+npx nx run roster-front:graphql:generate                        # Regenerate types
+npx nx run roster-front:graphql:generate --configuration=metadata  # Metadata schema
+```
+
+## الترجمات
+
+```bash
+npx nx run roster-front:lingui:extract   # Extract strings
+npx nx run roster-front:lingui:compile   # Compile translations
+```
+
+## البناء
+
+```bash
+npx nx build roster-shared   # Must be built first
+npx nx build roster-front
+npx nx build roster-server
+```
+
+<PageBanner illustration="card-page-cli" />
