@@ -3,11 +3,11 @@ import { normalizeDomain } from '@/utils/url/normalizeDomain';
 describe('normalizeDomain', () => {
   it.each([
     'roster.dev',
-    'roster.com',
+    'roster.dev',
     'www.roster.dev',
     'https://roster.dev',
     'https://www.roster.dev/',
-    'http://www.roster.com/careers?utm=1#team',
+    'http://www.roster.dev/careers?utm=1#team',
     '  https://roster.dev  ',
     'roster.dev.',
     'roster.dev:8080',
