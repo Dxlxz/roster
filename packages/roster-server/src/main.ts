@@ -105,7 +105,7 @@ const bootstrap = async () => {
     }),
   );
 
-  const keepAliveTimeout = rosterConfigService.get(
+  const keepAliveTimeout = configService.get(
     'SERVER_KEEP_ALIVE_TIMEOUT_MS',
   );
   const httpServer: Server = app.getHttpServer();
@@ -140,7 +140,7 @@ const bootstrap = async () => {
     process.once(signal, () => void shutdown());
   }
 
-  await app.listen(rosterConfigService.get('NODE_PORT'));
+  await app.listen(configService.get('NODE_PORT'));
 };
 
 void bootstrap();
